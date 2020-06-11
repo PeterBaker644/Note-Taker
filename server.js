@@ -3,6 +3,7 @@ const path = require("path");
 // const _ = require("lodash");
 const fs = require("fs");
 const util = require("util");
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const PORT = process.env.PORT || 3100;
@@ -57,8 +58,10 @@ app.post("/api/notes", async (req, res) => {
     try {
         let fileData = await readFileAsync(path.join(__dirname, "/db/db.json"),'utf-8');
         let notesArray = JSON.parse(fileData);
+        let newNote = JSON.parse(userEntry);
+        newNote.id = uuidv4();
         console.log(notesArray);
-        notesArray.push(JSON.parse(userEntry));
+        notesArray.push(newNote);
         await writeFileAsync(path.join(__dirname, "/db/db.json"), JSON.stringify(notesArray));
         console.log("Notes database has been successfully updated!")
         return res.json(userEntry);

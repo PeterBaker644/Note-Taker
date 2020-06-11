@@ -54,7 +54,7 @@ const renderActiveNote = () => {
 const handleNoteSave = function () {
     const newNote = {
         title: $noteTitle.val(),
-        text: $noteText.val(),
+        text: $noteText.val()
     };
 
     saveNote(newNote).then(() => {
@@ -63,7 +63,7 @@ const handleNoteSave = function () {
     });
 };
 
-// Delete the clicked note
+// Delete the click ed note
 const handleNoteDelete = function (event) {
     // prevents the click listener for the list from being called when the button inside of it is clicked
     event.stopPropagation();
