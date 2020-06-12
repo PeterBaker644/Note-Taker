@@ -1,6 +1,5 @@
 const express = require("express");
 const path = require("path");
-// const _ = require("lodash");
 const fs = require("fs");
 const util = require("util");
 const { v4: uuidv4 } = require('uuid');
@@ -10,12 +9,10 @@ const PORT = process.env.PORT || 3100;
 
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
-const appendFileAsync = util.promisify(fs.appendFile);
-
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 // Routes
 // =============================================================
@@ -27,54 +24,48 @@ app.get("/notes", (req, res) => {
 // API Routes
 // =============================================================
 
-// Should read the db.json file and return all saved notes as JSON.
-
 app.get("/api/notes", async (req, res) => {
     console.log("Attempting to read file");
     try {
-        let fileData = await readFileAsync(path.join(__dirname, "/db/db.json"),'utf-8');
+        let fileData = await readFileAsync(path.join(__dirname, "/db/db.json"), 'utf-8');
         return res.json(JSON.parse(fileData));
     } catch (err) {
         console.log(err);
     }
-    // return res.send("THIS IS BULLSHIT");
 });
-
-//     let rawdata = fs.readFileSync(path.join(__dirname, "/db/db.json"),'utf-8');
-//     parsedData = JSON.parse(rawdata);
-//     console.log(parsedData);
-//     return res.json(parsedData);
-
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "/public/index.html"));
-});
-
-
-// Should receive a new note to save on the request body, add it to the db.json file, and then return the new note to the client.
 
 app.post("/api/notes", async (req, res) => {
     let userEntry = JSON.stringify(req.body);
     console.log(JSON.parse(userEntry));
     try {
-        let fileData = await readFileAsync(path.join(__dirname, "/db/db.json"),'utf-8');
+        let fileData = await readFileAsync(path.join(__dirname, "/db/db.json"), 'utf-8');
         let notesArray = JSON.parse(fileData);
         let newNote = JSON.parse(userEntry);
         newNote.id = uuidv4();
-        console.log(notesArray);
         notesArray.push(newNote);
         await writeFileAsync(path.join(__dirname, "/db/db.json"), JSON.stringify(notesArray));
-        console.log("Notes database has been successfully updated!")
+        console.log("Notes database has been successfully updated!");
         return res.json(userEntry);
     } catch (err) {
         console.log(err);
     }
 });
 
-// Should receive a query parameter containing the id of a note to delete. This means you'll need to find a way to give each note a unique id when it's saved. In order to delete a note, you'll need to read all notes from the db.json file, remove the note with the given id property, and then rewrite the notes to the db.json file.
+app.delete("/api/notes/:id", (req, res) => {
+    let noteId = req.params.id;
+    let fileData = fs.readFileSync(path.join(__dirname, "/db/db.json"), 'utf-8');
+    let notesArray = JSON.parse(fileData);
+    for (note of notesArray) {
+        if (note.id == noteId) {
+            notesArray.pop(note);
+            fs.writeFileSync(path.join(__dirname, "/db/db.json"), JSON.stringify(notesArray));
+        }
+    }
+    res.json({message: "File Deleted"});
+});
 
-app.delete("/api/notes/:id", function () {
-    waitlist.length = 0;
-    reservations.length = 0;
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "/public/index.html"));
 });
 
 // Starts the server to begin listening
