@@ -14,16 +14,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
-// Routes
-// =============================================================
-
+// Returns the main application page
 app.get("/notes", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/notes.html"));
 });
 
-// API Routes
-// =============================================================
-
+// Reads the `db.json` file and returns all saved notes as JSON
 app.get("/api/notes", async (req, res) => {
     console.log("Attempting to read file");
     try {
@@ -34,9 +30,9 @@ app.get("/api/notes", async (req, res) => {
     }
 });
 
+// Receives a new note to save on the request body, adds it to the `db.json` file, and then returns the new note to the client
 app.post("/api/notes", async (req, res) => {
     let userEntry = JSON.stringify(req.body);
-    console.log(JSON.parse(userEntry));
     try {
         let fileData = await readFileAsync(path.join(__dirname, "/db/db.json"), 'utf-8');
         let notesArray = JSON.parse(fileData);
@@ -51,6 +47,7 @@ app.post("/api/notes", async (req, res) => {
     }
 });
 
+// Receives a query parameter containing the id of a note to delete, reads the notes from the db file, removes the note matching the id, and then rewrites the notes to the db file
 app.delete("/api/notes/:id", (req, res) => {
     let noteId = req.params.id;
     let fileData = fs.readFileSync(path.join(__dirname, "/db/db.json"), 'utf-8');
@@ -64,6 +61,7 @@ app.delete("/api/notes/:id", (req, res) => {
     res.json({message: "File Deleted"});
 });
 
+// Returns the splash page
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/index.html"));
 });
